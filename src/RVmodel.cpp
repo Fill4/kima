@@ -128,7 +128,7 @@ void RVmodel::calculate_C()
     const vector<double>& t = data.get_t();
     const vector<double>& sig = data.get_sig();
     const vector<int>& obsi = data.get_obsi();
-    int N = data.N();
+    size_t N = data.N();
     double jit;
 
     #if TIMING
@@ -618,7 +618,7 @@ double RVmodel::perturb(RNG& rng)
 double RVmodel::log_likelihood() const
 {
     auto data = Data::get_instance();
-    int N = data.N();
+    size_t N = data.N();
     auto y = data.get_y();
     auto sig = data.get_sig();
     auto obsi = data.get_obsi();
@@ -729,7 +729,7 @@ void RVmodel::print(std::ostream& out) const
 
     auto data = Data::get_instance();
     if(data.indicator_correlations){
-        for(int j=0; j<data.number_indicators; j++){
+        for(size_t j=0; j<data.number_indicators; j++){
             out<<betas[j]<<'\t';
         }
     }
@@ -771,7 +771,7 @@ string RVmodel::description() const
 
     auto data = Data::get_instance();
     if(data.indicator_correlations){
-        for(int j=0; j<data.number_indicators; j++){
+        for(size_t j=0; j<data.number_indicators; j++){
             desc += "beta" + std::to_string(j+1) + "   ";
         }
     }
@@ -808,6 +808,7 @@ void RVmodel::save_setup() {
 
     time_t rawtime;
     time (&rawtime);
+
     fout << ";" << ctime(&rawtime) << endl;
 
     fout << "[kima]" << endl;

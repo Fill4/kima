@@ -95,8 +95,8 @@ void Data::load(const char* filename, const char* units,
   sig.clear();
   
   // check for indicator correlations and store stuff
-  int nempty = count(indicators.begin(), indicators.end(), "");
-  number_indicators = indicators.size() - nempty;
+  size_t nempty = count(indicators.begin(), indicators.end(), "");
+  number_indicators = static_cast<unsigned int>(indicators.size() - nempty);
   indicator_correlations = number_indicators > 0;
   indicator_names = indicators;
   indicator_names.erase(
@@ -106,7 +106,7 @@ void Data::load(const char* filename, const char* units,
   // Empty the indicator vectors as well
   actind.clear();
   actind.resize(number_indicators);
-  for (unsigned n = 0; n < number_indicators; n++)
+  for (size_t n = 0; n < number_indicators; n++)
     actind[n].clear();
 
   // Read the file into the data container
@@ -133,7 +133,7 @@ void Data::load(const char* filename, const char* units,
   if(units == "kms") factor = 1E3;
   int j;
 
-  for (unsigned n = 0; n < data.size(); n++)
+  for (size_t n = 0; n < data.size(); n++)
     {
       if (n<skip) continue;
       t.push_back(data[n][0]);
@@ -143,7 +143,7 @@ void Data::load(const char* filename, const char* units,
       if (indicator_correlations)
       {
         j = 0;
-        for (unsigned i = 0; i < number_indicators + nempty; i++)
+        for (size_t i = 0; i < number_indicators + nempty; i++)
         {
           if (indicators[i] == "")
             continue; // skip column
@@ -169,10 +169,10 @@ void Data::load(const char* filename, const char* units,
   }
 
   // How many points did we read?
-  printf("# Loaded %d data points from file %s\n", t.size(), filename);
+  printf("# Loaded %zu data points from file %s\n", t.size(), filename);
   // Did we read activity indicators? how many?
   if(indicator_correlations){
-    printf("# Loaded %d observations of %d activity indicators: ", actind[0].size(), actind.size());
+    printf("# Loaded %zu observations of %zu activity indicators: ", actind[0].size(), actind.size());
     for (const auto i: indicators){
       if (i != ""){
         printf("'%s'", i);
@@ -185,11 +185,11 @@ void Data::load(const char* filename, const char* units,
   if(units == "kms")
     printf("# Multiplied all RVs by 1000; units are now m/s.\n");
 
-  for(unsigned i=0; i<data.size(); i++)
+  for(size_t i=0; i<data.size(); i++)
   {
       if (t[i] > 57170.)
       {
-          index_fibers = i;
+          index_fibers = static_cast<int>(i);
           break;
       }
   }
@@ -243,7 +243,7 @@ void Data::load_multi(const char* filename, const char* units, int skip)
   double factor = 1.;
   if(units == "kms") factor = 1E3;
 
-  for (unsigned n = 0; n < data.size(); n++)
+  for (size_t n = 0; n < data.size(); n++)
     {
       if (n<skip) continue;
       t.push_back(data[n][0]);
@@ -253,21 +253,21 @@ void Data::load_multi(const char* filename, const char* units, int skip)
     }
 
   // How many points did we read?
-  printf("# Loaded %d data points from file %s\n", t.size(), filename);
+  printf("# Loaded %zu data points from file %s\n", t.size(), filename);
 
   // Of how many instruments?
   std::set<int> s( obsi.begin(), obsi.end() );
-  printf("# RVs come from %d different instruments.\n", s.size());
-  number_instruments = s.size();
+  printf("# RVs come from %zu different instruments.\n", s.size());
+  number_instruments = static_cast<unsigned int>(s.size());
   
   if(units == "kms") 
     cout << "# Multiplied all RVs by 1000; units are now m/s." << endl;
 
-  for(unsigned i=0; i<data.size(); i++)
+  for(size_t i=0; i<data.size(); i++)
   {
       if (t[i] > 57170.)
       {
-          index_fibers = i;
+          index_fibers = static_cast<int>(i);
           break;
       }
   }
@@ -305,7 +305,7 @@ void Data::load_multi(vector<char*> filenames, const char* units, int skip,
 
   std::string dump; // to dump the first skip lines of each file
   int filecount = 1;
-  int last_file_size = 0;
+  size_t last_file_size = 0;
 
   // Read the files into the data container
   for (auto &filename : filenames) {
@@ -324,7 +324,7 @@ void Data::load_multi(vector<char*> filenames, const char* units, int skip,
     infile.close();
 
     // Assign instrument int identifier to obsi
-    for(unsigned i=last_file_size; i<data.size(); i++){
+    for(size_t i=last_file_size; i<data.size(); i++){
       obsi.push_back(filecount);
     }
     
@@ -342,7 +342,7 @@ void Data::load_multi(vector<char*> filenames, const char* units, int skip,
   double factor = 1.;
   if(units == "kms") factor = 1E3;
 
-  for (unsigned n=0; n<data.size(); n++)
+  for (size_t n=0; n<data.size(); n++)
     {
       // if (n<skip) continue;
       t.push_back(data[n][0]);
@@ -351,7 +351,7 @@ void Data::load_multi(vector<char*> filenames, const char* units, int skip,
     }
 
   // How many points did we read?
-  printf("# Loaded %d data points from files\n", t.size());
+  printf("# Loaded %zu data points from files\n", t.size());
   cout << "# ";
   for (auto f: filenames)
     cout << f << " ; ";
@@ -361,8 +361,8 @@ void Data::load_multi(vector<char*> filenames, const char* units, int skip,
   std::set<int> s( obsi.begin(), obsi.end() );
   // set<int>::iterator iter;
   // for(iter=s.begin(); iter!=s.end();++iter) {  cout << (*iter) << endl;}
-  printf("# RVs come from %d different instruments.\n", s.size());
-  number_instruments = s.size();
+  printf("# RVs come from %zu different instruments.\n", s.size());
+  number_instruments = static_cast<int>(s.size());
 
   if(units == "kms") 
     cout << "# Multiplied all RVs by 1000; units are now m/s." << endl;
@@ -370,7 +370,7 @@ void Data::load_multi(vector<char*> filenames, const char* units, int skip,
   if(number_instruments > 1)
   {
     // We need to sort t because it comes from different instruments
-    int N = t.size();
+    size_t N = t.size();
     std::vector<double> tt(N), yy(N);
     std::vector<double> sigsig(N), obsiobsi(N);
     std::vector<int> order(N);
@@ -380,14 +380,14 @@ void Data::load_multi(vector<char*> filenames, const char* units, int skip,
     std::iota(order.begin(), order.end(), x++);
     sort( order.begin(),order.end(), [&](int i,int j){return t[i] < t[j];} );
 
-    for(unsigned i=0; i<N; i++){
+    for(size_t i=0; i<N; i++){
       tt[i] = t[order[i]];
       yy[i] = y[order[i]];
       sigsig[i] = sig[order[i]];
       obsiobsi[i] = obsi[order[i]];
     }
 
-    for(unsigned i=0; i<N; i++){
+    for(size_t i=0; i<N; i++){
       t[i] = tt[i];
       y[i] = yy[i];
       sig[i] = sigsig[i];
@@ -399,11 +399,11 @@ void Data::load_multi(vector<char*> filenames, const char* units, int skip,
     //     cout << t[i] << "\t" << y[i] << "\t" << sig[i] << "\t" << obsi[i] <<  endl;
   }
 
-  for(unsigned i=0; i<data.size(); i++)
+  for(size_t i=0; i<data.size(); i++)
   {
       if (t[i] > 57170.)
       {
-          index_fibers = i;
+          index_fibers = static_cast<int>(i);
           break;
       }
   }

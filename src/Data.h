@@ -34,7 +34,7 @@ class Data
 
 
 		bool indicator_correlations;
-		int number_indicators;
+		unsigned int number_indicators;
 		std::vector<char*> indicator_names;
 
 		const char* datafile;
@@ -42,10 +42,10 @@ class Data
 		const char* dataunits;
 		int dataskip;
 		bool datamulti; // multiple instruments? not sure if needed
-		int number_instruments;
+		unsigned int number_instruments;
 
 		/// @brief Get the number of RV points. @return int
-		int N() const {return t.size();}
+		size_t N() const {return t.size();}
 
 		/// @brief Get the array of times @return const std::vector<double>&
 		const std::vector<double>& get_t() const { return t; }
@@ -90,7 +90,7 @@ class Data
 		/// @brief Get the array of instrument identifiers @return std::vector<int>&
 		const std::vector<int>& get_obsi() const { return obsi; }
 		/// @brief Get the number of instruments. @return int
-		int Ninstruments() const {std::set<int> s(obsi.begin(), obsi.end()); return s.size();}
+		size_t Ninstruments() const {std::set<int> s(obsi.begin(), obsi.end()); return s.size();}
 
 
 	// Singleton
