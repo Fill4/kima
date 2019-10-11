@@ -26,3 +26,4 @@ celerite
 boost
 
 build/
+build_unix/
