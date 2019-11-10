@@ -8,25 +8,33 @@ add_executable(kima)
 set(source_dir ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(kima_sources
     ${source_dir}/distributions/Fixed.cpp
-    ${source_dir}/Data.cpp
-    ${source_dir}/RVConditionalPrior.cpp
-    ${source_dir}/RVmodel.cpp
+    ${source_dir}/data.cpp
+    # ${source_dir}/RVConditionalPrior.cpp
+    # ${source_dir}/RVmodel.cpp
+    ${source_dir}/system.cpp
+    ${source_dir}/planet.cpp
     ${source_dir}/main.cpp
 )
 target_sources(kima PUBLIC ${kima_sources})
 # Include .h from kima
 target_include_directories(kima PUBLIC ${source_dir})
-# Include Eigen
-target_include_directories(kima PUBLIC eigen)
 
+# Set libs folder for all external code
+set(third_party_dir ${CMAKE_CURRENT_SOURCE_DIR}/third-party)
+set(libs_dir ${CMAKE_CURRENT_SOURCE_DIR}/libs)
+
+# ----------------------- EIGEN ---------------------------------
+# Include Eigen
+target_include_directories(kima PUBLIC ${third_party_dir}/eigen)
 
 # ----------------------- DNEST4 --------------------------------
 # Compile Dnest4 lib - Building everything here to not mess with DNest4 files
 add_library(dnest4 STATIC)
 
 # Define DNest4 sources and add include dirs
-set(dnest4_dir ${CMAKE_CURRENT_SOURCE_DIR}/DNest4/code)
+set(dnest4_dir ${third_party_dir}/DNest4/code)
 set(dnest4_sources
+    ${dnest4_dir}/DNest4.h
     ${dnest4_dir}/Barrier.cpp
     ${dnest4_dir}/CommandLineOptions.cpp
     ${dnest4_dir}/Level.cpp
@@ -57,12 +65,12 @@ target_include_directories(dnest4 PUBLIC ${dnest4_dir})
 # Link DNest4 lib. Pthread comes from the PUBLIC interface
 target_link_libraries(kima PUBLIC dnest4)
 
+# ------------------------ spdlog lib ---------------------------------
+add_subdirectory(${third_party_dir}/spdlog-1.4.2)
+target_link_libraries(kima PRIVATE spdlog)
 
-
-# OS-specific definitions
-# ---------------------------------------------------------------
+# ---------------- OS-specific definitions and libs -------------------
 # If we are on windows, handle the lack of unistd and getopt files from DNest4
-set(libs_dir ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 if (WIN32)
     set(libs_sources
         ${libs_dir}/unistd/getopt.c
@@ -71,10 +79,6 @@ if (WIN32)
     target_include_directories(dnest4 PRIVATE ${libs_dir}/unistd)
 endif()
 
-
-# Common definitions for all OSs
-target_compile_definitions(kima PUBLIC EIGEN_MPL2_ONLY)
-target_compile_features(kima PUBLIC cxx_std_11 c_std_11)
 # OS-specific compile options and definitions (can't target release and debug specifically yet). 
 if (WIN32)
     # WINDOWS: Define _USE_MATH_DEFINES to have M_PI and M_PI_2 definitions
@@ -91,3 +95,7 @@ if(UNIX)
     # Debug flags
     # target_compile_options(dnest4 PUBLIC -Wall -Wextra -Wpedantic -Wconversion)
 endif(UNIX)
+
+# Common definitions for all OSs
+target_compile_definitions(kima PUBLIC EIGEN_MPL2_ONLY)
+target_compile_features(kima PUBLIC cxx_std_11 c_std_11)

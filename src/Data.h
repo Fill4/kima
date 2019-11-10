@@ -1,113 +1,85 @@
 // (c) 2019 João Faria
 // This file is part of kima, which is licensed under the MIT license (see LICENSE for details)
 
-#ifndef DNest4_Data
-#define DNest4_Data
+#pragma once
 
 #include <vector>
-#include <algorithm>
-#include <set>
-#include <cmath>
+#include <string>
 
-class Data
+struct Data
 {
-	private:
-		std::vector<double> t, y, sig;
-		std::vector<int> obsi;
-		std::vector<std::vector<double>> actind;
+	struct {
+		bool has_rv = false;
 
-	public:
-		Data();
+		std::vector<std::string> filenames;
+		std::string units;
+		uint32_t skip;
 
-		// to read data from one file, one instrument
-		void load(const char* filename, const char* units, int skip=2, 
-				  const std::vector<char*>& indicators = std::vector<char*>());
+		std::vector<double> t, y, y_err;
+		std::vector<int32_t> instrument_ids;
+		std::vector<std::vector<double>> activity_indicators;
 
-		// to read data from one file, more than one instrument
-		void load_multi(const char* filename, const char* units, int skip=2);
-
-		// to read data from more than one file, more than one instrument
-		void load_multi(std::vector<char*> filenames, const char* units, int skip=2,
-		                const std::vector<char*>& indicators = std::vector<char*>());
-
-		int index_fibers;
-
-
+		uint32_t index_fibers;
+		
 		bool indicator_correlations;
-		unsigned int number_indicators;
-		std::vector<char*> indicator_names;
+		uint32_t number_indicators;
+		std::vector<std::string> indicator_names;
 
-		const char* datafile;
-		std::vector<char*> datafiles;
-		const char* dataunits;
-		int dataskip;
-		bool datamulti; // multiple instruments? not sure if needed
-		unsigned int number_instruments;
+		uint32_t number_instruments;
+	} rv;
 
-		/// @brief Get the number of RV points. @return int
-		size_t N() const {return t.size();}
+	struct {
+		bool has_transit = false;
 
-		/// @brief Get the array of times @return const std::vector<double>&
-		const std::vector<double>& get_t() const { return t; }
-		/// @brief Get the array of RVs @return const std::vector<double>&
-		const std::vector<double>& get_y() const { return y; }
-		/// @brief Get the array of errors @return const std::vector<double>&
-		const std::vector<double>& get_sig() const { return sig; }
+		std::vector<std::string> filenames;
+		std::string units;
+		uint32_t skip;
 
-		/// @brief Get the mininum (starting) time @return double
-		double get_t_min() const { return *std::min_element(t.begin(), t.end()); }
-		/// @brief Get the maximum (ending) time @return double
-		double get_t_max() const { return *std::max_element(t.begin(), t.end()); }
-		/// @brief Get the middle (average) time @return double
-		double get_t_middle() const { return get_t_min() + 0.5*(get_t_max() - get_t_min()); }
-		/// @brief Get the timespan @return double
-		double get_timespan() const { return get_t_max() - get_t_min(); }
+		std::vector<double> t, y, y_err;
+	} transit;
 
-		/// @brief Get the mininum RV @return double
-		double get_y_min() const { return *std::min_element(y.begin(), y.end()); }
-		/// @brief Get the maximum RV @return double
-		double get_y_max() const { return *std::max_element(y.begin(), y.end()); }
-		/// @brief Get the RV span @return double
-		double get_RV_span() const { return get_y_max() - get_y_min(); }
-		/// @brief Get the variance of the RVs @return double
-		double get_RV_var() const;
-		/// @brief Get the standard deviation of the RVs @return double
-		double get_RV_std() const { return std::sqrt(get_RV_var()); }
-		
-		/// @brief Get the RV span, adjusted for multiple instruments @return double
-		double get_adjusted_RV_span() const;
-		/// @brief Get the RV variance, adjusted for multiple instruments @return double
-		double get_adjusted_RV_var() const;
-		/// @brief Get the RV standard deviation, adjusted for multiple instruments @return double
-		double get_adjusted_RV_std() const { return std::sqrt(get_adjusted_RV_var()); }
-		
-		/// @brief Get the maximum slope allowed by the data. @return double
-		double topslope() const {return std::abs(get_y_max() - get_y_min()) / (t.back() - t.front());}
+	void read_csv(const std::string& filename, std::vector<std::vector<double>>& data);
+	// Load up the RV data from a 3 column file. Can handle multiple instruments from multiple files
+	void load_rv(const std::vector<std::string>& filenames, const std::string& units, uint32_t skip=2);
+	// Load up the transit data from a 3 column file
+	void load_transit(const std::vector<std::string>& filenames, const std::string& units, uint32_t skip=2);
 
-		/// @brief Get the array of activity indictators @return std::vector<std::vector<double>>&
-		const std::vector<std::vector<double>>& get_actind() const { return actind; }
+	/// @brief Get the mininum (starting) RV time @return double
+	double rv_t_min() const;
+	/// @brief Get the maximum (ending) RV time @return double
+	double rv_t_max() const;
+	/// @brief Get the middle (average) RV time @return double
+	double rv_t_middle() const;
+	/// @brief Get the RV timespan @return double
+	double rv_timespan() const;
 
-		/// @brief Get the array of instrument identifiers @return std::vector<int>&
-		const std::vector<int>& get_obsi() const { return obsi; }
-		/// @brief Get the number of instruments. @return int
-		size_t Ninstruments() const {std::set<int> s(obsi.begin(), obsi.end()); return s.size();}
-
+	/// @brief Get the mininum RV @return double
+	double rv_y_min() const;
+	/// @brief Get the maximum RV @return double
+	double rv_y_max() const;
+	/// @brief Get the RV span @return double
+	double rv_y_span() const;
+	/// @brief Get the variance of the RVs @return double
+	double rv_y_var() const;
+	/// @brief Get the standard deviation of the RVs @return double
+	double rv_y_std() const;
+	
+	/// @brief Get the RV span, adjusted for multiple instruments @return double
+	double rv_adjusted_y_span() const;
+	/// @brief Get the RV variance, adjusted for multiple instruments @return double
+	double rv_adjusted_y_var() const;
+	/// @brief Get the RV standard deviation, adjusted for multiple instruments @return double
+	double rv_adjusted_y_std() const;
+	
+	/// @brief Get the maximum slope allowed by the data. @return double
+	double rv_top_slope() const;
 
 	// Singleton
-	private:
-		static Data instance;
+	static Data& instance() { static Data theData; return theData; }
+	// Destroy all ways to create another Data instance
+	private: 
+		Data() {} // Private constructor
 	public:
-		static Data& get_instance() { return instance; }
-		static Data& get_data() { return instance; }
+		Data(Data const&) = delete;
+        void operator=(Data const&) = delete;
 };
-
-
-template< class... Args >
-void load( Args&&... args ) { Data::get_instance().load(args...); }
-
-template< class... Args >
-void load_multi( Args&&... args ) { Data::get_instance().load_multi(args...); }
-
-
-#endif
-

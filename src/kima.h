@@ -1,18 +1,17 @@
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <string>
+
 #include "DNest4.h"
 #include "distributions/Fixed.h"
-
-#include "Data.h"
-#include "RVmodel.h"
-#include "RVConditionalPrior.h"
+#include "data.h"
+#include "system.h"
+// #include "RVmodel.h"
+// #include "RVConditionalPrior.h"
 
 const double PI = M_PI;
 
-char* datafile;
-std::vector<char*> datafiles;
-
-
-using ind = std::vector<char*>;
-std::vector<char*> indicators;
-
-
-using namespace DNest4;
+std::vector<std::string> rv_files;
+std::vector<std::string> transit_files;
+std::vector<std::string> indicators;
