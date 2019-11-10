@@ -21,9 +21,11 @@ paper
 kima
 main
 
-
 celerite
 boost
 
 build/
+run_win32/
 build_unix/
+run_unix/
+notes.txt
